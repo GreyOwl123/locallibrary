@@ -6,6 +6,8 @@ const Book = require("../models/book");
 
 const Author = require("../models/author");
 
+const Genre = require("../models/genre");
+
 // Display list of all Authors.
 exports.author_list = function (req, res, next) {
   Author.find()
@@ -186,13 +188,36 @@ exports.author_delete_post = (req, res, next) => {
   );
 };
 
-
-// Display Author update form on GET.
-exports.author_update_get = (req, res) => {
-  res.send("NOT IMPLEMENTED: Author update GET");
+// Display author update form on GET.
+exports.author_update_get = (req, res, next) => {
+  // Get book, authors and genres for form.
+  async.parallel(
+    {
+      author(callback) {
+        Author.findById(req.params.id)
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (results.author == null) {
+        // No results.
+        const err = new Error("Author not found");
+        err.status = 404;
+        return next(err);
+      }
+      // Success
+      res.render("author_form", {
+        title: "Update Author",
+        author: results.author,
+      });
+    }
+  );
 };
 
-// Handle Author update on POST.
+
+// 
 exports.author_update_post = (req, res) => {
-  res.send("NOT IMPLEMENTED: Author update POST");
+  res.send("Not Implemeted");
 };

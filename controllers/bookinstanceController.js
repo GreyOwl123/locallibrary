@@ -114,14 +114,9 @@ exports.bookinstance_create_post = [
 ];
 
 // Display BookInstance delete form on GET.
-exports.bookinstance_delete_get = (req, res, next) => {
-  async.parallel(
-    {
-      bookinstance(callback) {
-        BookInstance.findById(req.params.id).exec(callback);
-      },
-    },
-    (err, results) => {
+exports.bookinstance_delete_get = function (req, res, next) {
+  BookInstance.find()
+   .exec(function (err, bookinstance_list) {
       if (err) {
         return next(err);
       }
@@ -134,9 +129,8 @@ exports.bookinstance_delete_get = (req, res, next) => {
         title: "Delete BookInstance",
         bookinstance: results.bookinstance,
       });
-    }
-  );
-};
+    });
+  };
 
 
 
