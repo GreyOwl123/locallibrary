@@ -213,8 +213,9 @@ exports.genre_update_post = [
       const errors = validationResult(req);
   
       // Create a genre object with escaped and trimmed data.
-      const genre = new Genre({ name: req.body.name,
-             _id: req.params.id,
+      const genre = new Genre({ 
+        name: req.body.name,
+        _id: req.params.id,
       });
   
       if (!errors.isEmpty()) {
@@ -242,7 +243,7 @@ exports.genre_update_post = [
                 return next(err);
               }
               // Genre saved. Redirect to genre detail page.
-              res.redirect(genre.url);
+              res.redirect(thegenre.url);
             });
           }
         });

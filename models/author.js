@@ -31,29 +31,31 @@ AuthorSchema.virtual("url").get(function () {
   return `/catalog/author/${this._id}`;
 });
 
-// Virtual for author's D.O.B
-AuthorSchema.virtual("date_of_birth_formatted").get(function () {
-  return this.date_of_birth ?
-DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATE_MED) : '';
-});
-
-// Virtual for author's D.O.D
-AuthorSchema.virtual("date_of_death_formatted").get(function () {
-  return this.date_of_death ?
-DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATE_MED) : '';
-});
-
 //Virtual for author's lifespan
 AuthorSchema.virtual("lifespan").get(function () {
  let time = "";
-  if (this.date_of_birth && this.date_of_death) {
-    time = `${this.date_of_birth_formatted} - ${this.date_of_death_formatted}`;
- }
-  if (!this.date_of_birth || !this.date_of_death) {
-    time = "";
+  if (this.date_of_birth) {
+    time = DateTime.fromJSDate(this.date_of_birth).toLocaleString(
+      DateTime.DATE_MED
+      );
+  }
+  time += " - ";
+  if (this.date_of_death) {
+    time = DateTime.fromJSDate(this.date_of_death).toLocaleString(
+      DateTime.DATE_MED
+      );
   }
   return time;
 });
+
+AuthorSchema.virtual("date_of_birth_yyyy_mm_dd").get(function () {
+  return DateTime.fromJSDate(this.date_of_birth).toISODate();
+});
+
+AuthorSchema.virtual("date_of_death_yyyy_mm_dd").get(function () {
+  return DateTime.fromJSDate(this.date_of_death).toISODate();
+});
+
 
 // Export model
 module.exports = mongoose.model("Author", AuthorSchema);
