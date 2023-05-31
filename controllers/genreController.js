@@ -206,18 +206,18 @@ exports.genre_update_get = (req, res, next) => {
 exports.genre_update_post = [
     // Validate and sanitize the name field.
     body("name", "Genre name required").trim().isLength({ min: 1 }).escape(),
-  
+
     // Process request after validation and sanitization.
     (req, res, next) => {
       // Extract the validation errors from a request.
       const errors = validationResult(req);
-  
+
       // Create a genre object with escaped and trimmed data.
-      const genre = new Genre({ 
+      const genre = new Genre({
         name: req.body.name,
         _id: req.params.id,
       });
-  
+
       if (!errors.isEmpty()) {
         // There are errors. Render the form again with sanitized values/error messages.
         res.render("genre_form", {
@@ -233,7 +233,7 @@ exports.genre_update_post = [
           if (err) {
             return next(err);
           }
-  
+
           if (found_genre) {
             // Genre exists, redirect to its detail page.
             res.redirect(found_genre.url);
@@ -250,5 +250,3 @@ exports.genre_update_post = [
       }
     },
 ];
-  
-

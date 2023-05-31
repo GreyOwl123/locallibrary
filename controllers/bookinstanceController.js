@@ -25,24 +25,34 @@ exports.bookinstance_list = function (req, res, next) {
 
 // Display detail page for a specific BookInstance.
 exports.bookinstance_detail = (req, res, next) => {
-  BookInstance.findById(req.params.id)
-    .populate("book")
-    .exec((err, bookinstance) => {
+  async.parallel (
+    {
+      bookinstance(callback) {
+        BookInstance.findById(req.params.id).exec(callback);
+      },
+      bookinstances_books(callback) {
+        Book.find({ bookinstance: req.params.id }, "title summary").exec(callback);
+      },
+    },
+    (err, results) => {
       if (err) {
+        // Error in API usage.
         return next(err);
       }
-      if (bookinstance == null) {
+      if (results.bookinstance == null) {
         // No results.
-        const err = new Error("Book copy not found");
+        const err = new Error("BookInstance not found");
         err.status = 404;
         return next(err);
       }
       // Successful, so render.
       res.render("bookinstance_detail", {
-        title: `Copy: ${bookinstance.book.title}`,
-        bookinstance,
+        title: "BookInstance Detail",
+        bookinstance: results.bookinstance,
+        bookinstance_books: results.bookinstances_books,
       });
-    });
+    }
+  );
 };
 
 
@@ -118,40 +128,52 @@ exports.bookinstance_create_post = [
 
 // Display BookInstance delete form on GET.
 exports.bookinstance_delete_get = function (req, res, next) {
-  BookInstance.find()
-   .populate("book")
-   .exec(function (err, bookinstance) {
+  async.parallel(
+    {
+      bookinstance(callback) {
+        BookInstance.findById(req.params.id).exec(callback);
+      },
+      bookinstance_books(callback) {
+        Book.find({ bookinstance: req.params.id }).exec(callback);
+      },
+    },
+    (err, results) => {
       if (err) {
         return next(err);
       }
-      if (bookinstance == null) {
+      if (results.bookinstance == null) {
         // No results.
         res.redirect("/catalog/bookinstances");
       }
       // Successful, so render.
       res.render("bookinstance_delete", {
         title: "Delete BookInstance",
-        bookinstance: bookinstance,
+        bookinstance: results.bookinstance,
+        bookinstance_books: results.bookinstances_books,
       });
-    });
+    }
+  );
   };
 
 
 
 // Handle BookInstance delete on POST.
 exports.bookinstance_delete_post = (req, res, next) => {
- BookInstance.findById(req.params.id)
-    .populate("book")
-    .exec((err, bookinstance) => {
+   async.parallel(
+    {
+      bookinstance(callback) {
+        BookInstance.findById(req.body.bookinstanceid).exec(callback);
+      },
+    },
+    (err, results) => {
       if (err) {
         return next(err);
       }
       // Success
-      if (bookinstance.length > 0) {
-        // Render in same way as for GET route.
+      if (results.bookinstance.length > 0) {
         res.render("bookinstance_delete", {
           title: "Delete BookInstance",
-          bookinstance: bookinstance,
+          bookinstance: results.bookinstance,
         });
         return;
       }
@@ -231,24 +253,28 @@ exports.bookinstance_update_post = [
   
       if (!errors.isEmpty()) {
         // There are errors. Render form again with sanitized values and error messages.
-        Book.find({}, "title").exec(function (err, books) {
-          if (err) {
-            return next(err);
-          }
-          // Successful, so render.
-          res.render("bookinstance_form", {
-            title: "Create BookInstance",
-            book_list: books,
-            selected_book: bookinstance.book._id,
-            errors: errors.array(),
-            bookinstance,
-          });
+      async.parallel(
+        {
+          books(callback) {
+            Book.find(callback);
+          },
+        },
+       (err,results) => {
+         if (err) {
+          return next(err);
+         }
+        res.render("bookinstance_form", {
+          title: "Update BookInstance",
+          books: results.books,
+          bookinstance,
+          errors: errors.array(),
         });
+       });
         return;
       }
   
       // Data from form is valid. Update the record.
-      BookInstance(req.params.id, bookinstance, {}, (err, thebookinstance) => {
+      BookInstance.findByIdAndUpdate(req.params.id, bookinstance, {}, (err, thebookinstance) => {
         if (err) {
           return next(err);
         }

@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "production") {
+   require('dotenv').config();
+}
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -13,7 +17,7 @@ var app = express();
 // Set up mongoose connection
 const mongoose = require("mongoose");
 mongoose.set('strictQuery', false);
-const mongoDB = "mongodb+srv://admin:mx1d0mL3iNsDTydJ@cluster0.ybaz7vs.mongodb.net/locallibrary?retryWrites=true&w=majority";
+const mongoDB = process.env.MONGO_DB_URL;
 
 main().catch(err => console.log(err));
 async function main() {

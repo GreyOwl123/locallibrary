@@ -248,7 +248,7 @@ exports.author_update_post = [
   // Process request after validation and sanitization.
   (req, res, next) => {
     // Extract the validation errors from a request.
-    const errors = validationResult(req); 
+    const errors = validationResult(req);
 
    // Create an Author object with escaped/trimmed data and old id.
    const author = new Author({
@@ -280,20 +280,19 @@ exports.author_update_post = [
         errors: errors.array(),
       });
      }
-    ); 
+    );
     return;
    }
-  
-   
-  // Data from form is valid. Update the record    
+
+  // Data from form is valid. Update the record
   Author.findByIdAndUpdate(req.params.id, author, {}, (err, theauthor)  => {
     if (err) {
       return next(err);
     }
-    
+
   //Successful: redirect to author detail page.
    res.redirect(theauthor.url);
   });
 },
-  
+
 ];
